@@ -1,0 +1,30 @@
+pnpm install     # install locked dev-dependencies
+pnpm lint        # ESLint + Prettier (zero warnings allowed)
+pnpm test 
+
+import pandas as pd
+import re
+from typing import List, Dict
+
+file_path = "Expanded_Diary_Entries.csv"
+df = pd.read_csv(file_path, encoding="ISO-8859-1")
+
+def extract_tasks(text: str) -> List[Dict]:
+    tasks = []
+    verbs = r"\b(call|email|write|finish|start|submit|plan|organize|schedule|read|buy|build|clean)\b"
+    pattern = re.compile(rf"{verbs}\s+\w+", re.IGNORECASE)
+    matches = pattern.findall(text)
+    
+    for match in matches:
+        tasks.append({
+            "task_text": match.lower(),
+            "status": "pending",
+            "confidence": 0.9
+        })
+    return tasks
+
+sample_entries = df["transcript_user"].dropna().sample(n=10, random_state=42)
+results = sample_entries.apply(extract_tasks)
+
+
+
